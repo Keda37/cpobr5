@@ -1,3 +1,9 @@
+$.ajaxSetup({
+	headers: {
+		'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+	}
+});
+
 function validateEmail(email) {
 	var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 	return re.test(email);
@@ -6,14 +12,14 @@ function validateEmail(email) {
 function isValid($item) {
 	switch ($item.attr('type')) {
 		case 'text':
-		if ($item.attr('name') === 'email') {
-			return !!$item.val() && validateEmail($item.val());
-		}
-		return !!$item.val() && !!$.trim($item.val());
+			if ($item.attr('name') === 'email') {
+				return !!$item.val() && validateEmail($item.val());
+			}
+			return !!$item.val() && !!$.trim($item.val());
 		case 'checkbox':
-		return !!$item.is(':checked');
+			return !!$item.is(':checked');
 		default:
-		return false;
+			return false;
 	}
 }
 
@@ -21,11 +27,11 @@ function toggleClass($item, className, condition) {
 	condition = typeof condition !== 'undefined' ? condition : true;
 	switch ($item.attr('type')) {
 		case 'checkbox':
-		$item.parent().toggleClass(className, condition);
-		break;
+			$item.parent().toggleClass(className, condition);
+			break;
 		default:
-		$item.toggleClass(className, condition);
-		break;
+			$item.toggleClass(className, condition);
+			break;
 	}
 }
 
@@ -65,17 +71,17 @@ $(function () {
 		event.preventDefault();
 
 		var $form = $(this),
-		$submit_button = $form.find('.submit-request-button'),
-		isDisabled = $submit_button.hasClass('disabled');
+			$submit_button = $form.find('.submit-request-button'),
+			isDisabled = $submit_button.hasClass('disabled');
 
 		if (!isDisabled && checkRequired($form, true)) {
 			$submit_button.addClass('disabled');
 			$submit_button.prop('disabled', true);
 
 			var name = $form.find('.name-input').val(),
-			phone = $form.find('.phone-input').val(),
-			email = $form.find('.email-input').val(),
-			is_agreed = $form.find('#participateAgree').is(':checked')
+				phone = $form.find('.phone-input').val(),
+				email = $form.find('.email-input').val(),
+				courseId = $form.find('.course-id').val();
 
 			$.ajax({
 				method: 'post',
@@ -84,26 +90,29 @@ $(function () {
 					name: name,
 					phone: phone,
 					email: email,
-					is_agreed: is_agreed
+					course_id: courseId
 				},
 				success: function () {
-
 					$('.modal').addClass('active');
 					setTimeout(function () {
 						$('.modal').addClass('in');
 					}, 100);
 					$('.submit-request-button').val('Ваша заявка отправлена');
-					
-//					if (yaCounter34970585 && $form.data('goal')) {
-//						yaCounter34970585.reachGoal($form.data('goal'));
-//					}
-$form.addClass('sent');
-var callback = $form.data('callback');
-if (callback) {
-	callback();
-}
-}
-})
+
+					if ($form.data('aggregatable') && window.aggregate && typeof window.aggregate === 'function') {
+						aggregate($form);
+					}
+
+					if (yaCounter47423308 && $form.data('goal')) {
+						yaCounter47423308.reachGoal($form.data('goal'));
+					}
+					$form.addClass('sent');
+					var callback = $form.data('callback');
+					if (callback) {
+						callback();
+					}
+				}
+			})
 		}
 	});
 
@@ -114,10 +123,11 @@ if (callback) {
 	$('.form-checkbox').on('change', function () {
 		checkRequired($(this).closest('form'), false, $(this));
 	});
+
 	$('.modal-close').click(function() {
 		$('.modal').removeClass('in');
 		setTimeout(function () {
 			$('.modal').removeClass('active');
-		}, 250);
+		}, 250)
 	});
 });
