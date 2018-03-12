@@ -432,7 +432,7 @@ body {
 }
 
 .prog__item:nth-child(3) .prog__text {
-    margin-top: 57px;
+    margin-top: 43px;
     -webkit-align-self: flex-start;
     -ms-flex-item-align: start;
     align-self: flex-start
